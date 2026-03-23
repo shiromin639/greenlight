@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=greenlight
+      - POSTGRES_PASSWORD=1111
+      - POSTGRES_DB=greenlight
+    # No need to expose ports 5432:5432 unless you want to connect 
+    # from outside Docker (like pgAdmin or DBeaver)
+
+  app:
+    build: .
+    depends_on:
+      - db
+    restart: on-failure
+    environment:
+      # This NAME must match your Go code's GREENLIGHT_DB_DSN
+      - GREENLIGHT_DB_DSN=postgres://greenlight:1111@db:5432/greenlight?sslmode=disable
+      # Also add this just in case your Go template looks for a standard name
+      - DB_DSN=postgres://greenlight:1111@db:5432/greenlight?sslmode=disable
+    ports:
+      - "4000:4000"
